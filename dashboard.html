@@ -1,0 +1,346 @@
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TaskFlow - Tableau de bord</title>
+
+    <link href="./output.css" rel="stylesheet">
+
+    <style>
+        /* Image flottante couvrant tout l'écran */
+        .background-image {
+            position: fixed;
+            inset: -5%;
+            z-index: -2;
+            background-image: url("./bord.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            animation: flotter 15s ease-in-out infinite alternate;
+            will-change: transform;
+        }
+
+        /* Voile léger pour garder le contenu lisible */
+        .background-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: rgba(15, 23, 42, 0.30);
+            pointer-events: none;
+        }
+
+        /* Animation douce */
+        @keyframes flotter {
+            0% {
+                transform: translate3d(-1%, -1%, 0) scale(1);
+            }
+
+            50% {
+                transform: translate3d(1%, 0.5%, 0) scale(1.04);
+            }
+
+            100% {
+                transform: translate3d(-0.5%, 1%, 0) scale(1.07);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .background-image {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-slate-800">
+
+    <!-- Arrière-plan animé -->
+    <div class="background-image" aria-hidden="true"></div>
+    <div class="background-overlay" aria-hidden="true"></div>
+
+    <!-- En-tête -->
+    <header class="border-b border-white/20 bg-white/75 shadow-sm backdrop-blur-md">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-5">
+
+            <a href="./index.html"
+               class="text-3xl font-extrabold tracking-tight text-indigo-700">
+                TaskFlow
+            </a>
+
+            <nav class="flex flex-wrap gap-4 text-sm font-semibold">
+                <a href="./index.html" class="text-slate-700 hover:text-indigo-700">
+                    Mes tâches
+                </a>
+
+                <a href="./dashboard.html" class="text-indigo-700 hover:text-indigo-900">
+                    Tableau de bord
+                </a>
+
+                <a href="./calendrier.html" class="text-slate-700 hover:text-indigo-700">
+                    Calendrier
+                </a>
+
+                <a href="./statistiques.html" class="text-slate-700 hover:text-indigo-700">
+                    Statistiques
+                </a>
+
+                <a href="./parametres.html" class="text-slate-700 hover:text-indigo-700">
+                    Paramètres
+                </a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <main class="mx-auto min-h-[calc(100vh-140px)] max-w-6xl px-4 py-10 sm:px-6">
+
+        <!-- Présentation -->
+        <section class="mb-8 rounded-3xl border border-white/40 bg-white/75 p-6 shadow-xl backdrop-blur-md sm:p-8">
+
+            <p class="mb-2 text-sm font-bold uppercase tracking-widest text-indigo-700">
+                Vue d'ensemble
+            </p>
+
+            <h1 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">
+                Tableau de bord
+            </h1>
+
+            <p class="mt-3 text-slate-700">
+                Suis l'évolution de tes tâches et organise mieux ton travail.
+            </p>
+
+        </section>
+
+        <!-- Indicateurs -->
+        <section class="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
+            <article class="rounded-2xl border border-white/40 bg-white/80 p-6 shadow-lg backdrop-blur-md">
+                <p class="text-sm font-semibold text-slate-600">Total des tâches</p>
+                <p id="totalTasks" class="mt-3 text-4xl font-extrabold text-indigo-700">0</p>
+                <p class="mt-2 text-sm text-slate-600">Toutes tes tâches enregistrées</p>
+            </article>
+
+            <article class="rounded-2xl border border-white/40 bg-white/80 p-6 shadow-lg backdrop-blur-md">
+                <p class="text-sm font-semibold text-slate-600">Tâches en cours</p>
+                <p id="pendingTasks" class="mt-3 text-4xl font-extrabold text-amber-600">0</p>
+                <p class="mt-2 text-sm text-slate-600">Tâches restant à terminer</p>
+            </article>
+
+            <article class="rounded-2xl border border-white/40 bg-white/80 p-6 shadow-lg backdrop-blur-md">
+                <p class="text-sm font-semibold text-slate-600">Tâches terminées</p>
+                <p id="finishedTasks" class="mt-3 text-4xl font-extrabold text-green-600">0</p>
+                <p class="mt-2 text-sm text-slate-600">Travail déjà accompli</p>
+            </article>
+
+            <article class="rounded-2xl border border-white/40 bg-white/80 p-6 shadow-lg backdrop-blur-md">
+                <p class="text-sm font-semibold text-slate-600">Progression globale</p>
+                <p id="progressPercentage" class="mt-3 text-4xl font-extrabold text-purple-700">0 %</p>
+
+                <div class="mt-4 h-3 overflow-hidden rounded-full bg-slate-200">
+                    <div id="progressBar"
+                         class="h-full rounded-full bg-purple-600 transition-all duration-500"
+                         style="width: 0%">
+                    </div>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- Priorités -->
+        <section class="mb-8 rounded-3xl border border-white/40 bg-white/80 p-6 shadow-xl backdrop-blur-md">
+
+            <h2 class="mb-5 text-xl font-bold text-slate-900">
+                Répartition des priorités
+            </h2>
+
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+
+                <article class="rounded-2xl border border-red-200 bg-red-50/90 p-5">
+                    <p class="font-semibold text-red-700">Priorité haute</p>
+                    <p id="highPriority" class="mt-2 text-3xl font-extrabold text-red-800">0</p>
+                </article>
+
+                <article class="rounded-2xl border border-amber-200 bg-amber-50/90 p-5">
+                    <p class="font-semibold text-amber-700">Priorité moyenne</p>
+                    <p id="mediumPriority" class="mt-2 text-3xl font-extrabold text-amber-800">0</p>
+                </article>
+
+                <article class="rounded-2xl border border-green-200 bg-green-50/90 p-5">
+                    <p class="font-semibold text-green-700">Priorité basse</p>
+                    <p id="lowPriority" class="mt-2 text-3xl font-extrabold text-green-800">0</p>
+                </article>
+
+            </div>
+
+        </section>
+
+        <!-- Tâches à venir -->
+        <section class="rounded-3xl border border-white/40 bg-white/80 p-6 shadow-xl backdrop-blur-md">
+
+            <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+                <h2 class="text-xl font-bold text-slate-900">
+                    Prochaines échéances
+                </h2>
+
+                <a href="./index.html"
+                   class="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700">
+                    Gérer mes tâches
+                </a>
+            </div>
+
+            <div id="upcomingTasks" class="space-y-3"></div>
+
+            <p id="noUpcomingTasks"
+               class="hidden rounded-xl border border-dashed border-slate-300 bg-white/60 p-6 text-center text-slate-600">
+                Aucune tâche avec une échéance à venir.
+            </p>
+
+        </section>
+
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="border-t border-white/20 bg-white/70 px-4 py-5 text-center text-sm text-slate-700 backdrop-blur-md">
+        © 2026 TaskFlow — Organise tes tâches, avance à ton rythme.
+    </footer>
+
+    <!-- Calculs du tableau de bord -->
+    <script>
+        const STORAGE_KEY = "taskflow_tasks";
+
+        const totalTasksElement = document.getElementById("totalTasks");
+        const pendingTasksElement = document.getElementById("pendingTasks");
+        const finishedTasksElement = document.getElementById("finishedTasks");
+        const progressPercentageElement = document.getElementById("progressPercentage");
+        const progressBar = document.getElementById("progressBar");
+
+        const highPriorityElement = document.getElementById("highPriority");
+        const mediumPriorityElement = document.getElementById("mediumPriority");
+        const lowPriorityElement = document.getElementById("lowPriority");
+
+        const upcomingTasksElement = document.getElementById("upcomingTasks");
+        const noUpcomingTasksElement = document.getElementById("noUpcomingTasks");
+
+        function getTasks() {
+            try {
+                const storedTasks = localStorage.getItem(STORAGE_KEY);
+                const parsedTasks = storedTasks ? JSON.parse(storedTasks) : [];
+
+                if (!Array.isArray(parsedTasks)) {
+                    return [];
+                }
+
+                return parsedTasks.filter(task =>
+                    task &&
+                    typeof task.name === "string" &&
+                    ["Basse", "Moyenne", "Haute"].includes(task.priority)
+                ).map(task => ({
+                    name: task.name,
+                    priority: task.priority,
+                    dueDate: task.dueDate || "",
+                    finished: Boolean(task.finished)
+                }));
+            } catch (error) {
+                console.error("Erreur de lecture des tâches :", error);
+                return [];
+            }
+        }
+
+        function formatDate(dateString) {
+            const parts = dateString.split("-");
+            return parts.length === 3
+                ? parts[2] + "/" + parts[1] + "/" + parts[0]
+                : dateString;
+        }
+
+        function displayUpcomingTasks(tasks) {
+            upcomingTasksElement.replaceChildren();
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const upcoming = tasks
+                .map((task, index) => ({ task, index }))
+                .filter(item => {
+                    if (item.task.finished || !item.task.dueDate) {
+                        return false;
+                    }
+
+                    const date = new Date(item.task.dueDate + "T00:00:00");
+                    return !Number.isNaN(date.getTime()) && date >= today;
+                })
+                .sort((a, b) => a.task.dueDate.localeCompare(b.task.dueDate))
+                .slice(0, 5);
+
+            noUpcomingTasksElement.classList.toggle("hidden", upcoming.length > 0);
+
+            upcoming.forEach(item => {
+                const card = document.createElement("article");
+                card.className =
+                    "flex flex-col gap-2 rounded-xl border border-slate-200 bg-white/90 p-4 sm:flex-row sm:items-center sm:justify-between";
+
+                const name = document.createElement("p");
+                name.className = "break-words font-semibold text-slate-900";
+                name.textContent = item.task.name;
+
+                const details = document.createElement("p");
+                details.className = "text-sm text-slate-600";
+                details.textContent =
+                    "Échéance : " + formatDate(item.task.dueDate) +
+                    " · Priorité " + item.task.priority;
+
+                card.append(name, details);
+                upcomingTasksElement.appendChild(card);
+            });
+        }
+
+        function updateDashboard() {
+            const tasks = getTasks();
+
+            const total = tasks.length;
+            const finished = tasks.filter(task => task.finished).length;
+            const pending = total - finished;
+
+            const high = tasks.filter(task => task.priority === "Haute").length;
+            const medium = tasks.filter(task => task.priority === "Moyenne").length;
+            const low = tasks.filter(task => task.priority === "Basse").length;
+
+            const percentage = total > 0
+                ? Math.round((finished / total) * 100)
+                : 0;
+
+            totalTasksElement.textContent = total;
+            pendingTasksElement.textContent = pending;
+            finishedTasksElement.textContent = finished;
+
+            progressPercentageElement.textContent = percentage + " %";
+            progressBar.style.width = percentage + "%";
+            progressBar.setAttribute("aria-valuenow", percentage);
+
+            highPriorityElement.textContent = high;
+            mediumPriorityElement.textContent = medium;
+            lowPriorityElement.textContent = low;
+
+            displayUpcomingTasks(tasks);
+        }
+
+        updateDashboard();
+
+        /* Actualise les indicateurs quand on revient sur la page */
+        window.addEventListener("pageshow", updateDashboard);
+
+        /* Actualise aussi si les tâches changent dans un autre onglet */
+        window.addEventListener("storage", function (event) {
+            if (event.key === STORAGE_KEY) {
+                updateDashboard();
+            }
+        });
+    </script>
+
+</body>
+</html>
+```

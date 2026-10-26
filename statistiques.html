@@ -1,0 +1,415 @@
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TaskFlow - Statistiques</title>
+
+    <link href="./output.css" rel="stylesheet">
+
+    <style>
+        /* Image fixe couvrant tout l'écran */
+        .background-image {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background-image: url("./sta.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Voile léger pour améliorer la lisibilité */
+        .background-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: rgba(15, 23, 42, 0.30);
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-slate-800">
+
+    <!-- Image fixe en arrière-plan -->
+    <div class="background-image" aria-hidden="true"></div>
+    <div class="background-overlay" aria-hidden="true"></div>
+
+    <!-- En-tête -->
+    <header class="border-b border-white/20 bg-white/75 shadow-sm backdrop-blur-md">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-5">
+
+            <a href="./index.html"
+               class="text-3xl font-extrabold tracking-tight text-indigo-700">
+                TaskFlow
+            </a>
+
+            <nav class="flex flex-wrap gap-4 text-sm font-semibold">
+                <a href="./index.html" class="text-slate-700 hover:text-indigo-700">
+                    Mes tâches
+                </a>
+
+                <a href="./dashboard.html" class="text-slate-700 hover:text-indigo-700">
+                    Tableau de bord
+                </a>
+
+                <a href="./calendrier.html" class="text-slate-700 hover:text-indigo-700">
+                    Calendrier
+                </a>
+
+                <a href="./statistiques.html" class="text-indigo-700 hover:text-indigo-900">
+                    Statistiques
+                </a>
+
+                <a href="./parametres.html" class="text-slate-700 hover:text-indigo-700">
+                    Paramètres
+                </a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <main class="mx-auto min-h-[calc(100vh-140px)] max-w-6xl px-4 py-10 sm:px-6">
+
+        <!-- Présentation -->
+        <section class="mb-8 rounded-3xl border border-white/40 bg-white/75 p-6 shadow-xl backdrop-blur-md sm:p-8">
+
+            <p class="mb-2 text-sm font-bold uppercase tracking-widest text-indigo-700">
+                Analyse de productivité
+            </p>
+
+            <h1 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">
+                Mes statistiques
+            </h1>
+
+            <p class="mt-3 text-slate-700">
+                Analyse tes tâches, mesure ta progression et découvre tes habitudes de travail.
+            </p>
+
+        </section>
+
+        <!-- Filtre par période -->
+        <section class="mb-8 rounded-3xl border border-white/40 bg-white/80 p-6 shadow-lg backdrop-blur-md">
+
+            <label for="periodFilter"
+                   class="mb-3 block text-lg font-bold text-slate-900">
+                Choisir une période
+            </label>
+
+            <select id="periodFilter"
+                    class="w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 sm:max-w-sm">
+                <option value="all">Toutes les périodes</option>
+                <option value="week">Cette semaine</option>
+                <option value="month">Ce mois</option>
+                <option value="year">Cette année</option>
+            </select>
+
+            <p class="mt-3 text-sm text-slate-600">
+                Les statistiques par période utilisent la date d'échéance des tâches.
+                Les tâches sans date sont prises en compte uniquement dans la vue globale.
+            </p>
+
+        </section>
+
+        <!-- Indicateurs principaux -->
+        <section class="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
+            <article class="rounded-2xl border border-white/40 bg-white/85 p-6 shadow-lg backdrop-blur-md">
+                <p class="text-sm font-semibold text-slate-600">Total des tâches</p>
+                <p id="totalTasks" class="mt-3 text-4xl font-extrabold text-indigo-700">0</p>
+            </article>
+
+            <article class="rounded-2xl border border-white/40 bg-white/85 p-6 shadow-lg backdrop-blur-md">
+                <p class="text-sm font-semibold text-slate-600">Terminées</p>
+                <p id="finishedTasks" class="mt-3 text-4xl font-extrabold text-green-600">0</p>
+            </article>
+
+            <article class="rounded-2xl border border-white/40 bg-white/85 p-6 shadow-lg backdrop-blur-md">
+                <p class="text-sm font-semibold text-slate-600">En cours</p>
+                <p id="pendingTasks" class="mt-3 text-4xl font-extrabold text-amber-600">0</p>
+            </article>
+
+            <article class="rounded-2xl border border-white/40 bg-white/85 p-6 shadow-lg backdrop-blur-md">
+                <p class="text-sm font-semibold text-slate-600">Taux d'achèvement</p>
+                <p id="completionRate" class="mt-3 text-4xl font-extrabold text-purple-700">0 %</p>
+            </article>
+
+        </section>
+
+        <!-- Progression -->
+        <section class="mb-8 rounded-3xl border border-white/40 bg-white/80 p-6 shadow-xl backdrop-blur-md">
+
+            <h2 class="mb-5 text-xl font-bold text-slate-900">
+                Progression des tâches
+            </h2>
+
+            <div class="mb-3 flex items-center justify-between gap-3 text-sm">
+                <span class="font-semibold text-slate-700">Tâches accomplies</span>
+                <span id="progressLabel" class="font-bold text-purple-700">0 sur 0</span>
+            </div>
+
+            <div class="h-5 overflow-hidden rounded-full bg-slate-200">
+                <div id="progressBar"
+                     class="h-full rounded-full bg-purple-600 transition-all duration-500"
+                     style="width: 0%">
+                </div>
+            </div>
+
+            <p id="progressMessage" class="mt-4 text-slate-700">
+                Commence à terminer tes tâches pour suivre ta progression.
+            </p>
+
+        </section>
+
+        <!-- Répartition des priorités -->
+        <section class="mb-8 rounded-3xl border border-white/40 bg-white/80 p-6 shadow-xl backdrop-blur-md">
+
+            <h2 class="mb-5 text-xl font-bold text-slate-900">
+                Répartition des priorités
+            </h2>
+
+            <div class="space-y-5">
+
+                <div>
+                    <div class="mb-2 flex justify-between gap-3">
+                        <span class="font-semibold text-red-700">Haute</span>
+                        <span id="highPriority" class="font-bold text-slate-800">0</span>
+                    </div>
+                    <div class="h-3 overflow-hidden rounded-full bg-red-100">
+                        <div id="highBar" class="h-full rounded-full bg-red-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="mb-2 flex justify-between gap-3">
+                        <span class="font-semibold text-amber-700">Moyenne</span>
+                        <span id="mediumPriority" class="font-bold text-slate-800">0</span>
+                    </div>
+                    <div class="h-3 overflow-hidden rounded-full bg-amber-100">
+                        <div id="mediumBar" class="h-full rounded-full bg-amber-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="mb-2 flex justify-between gap-3">
+                        <span class="font-semibold text-green-700">Basse</span>
+                        <span id="lowPriority" class="font-bold text-slate-800">0</span>
+                    </div>
+                    <div class="h-3 overflow-hidden rounded-full bg-green-100">
+                        <div id="lowBar" class="h-full rounded-full bg-green-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Résumé -->
+        <section class="rounded-3xl border border-white/40 bg-white/80 p-6 shadow-xl backdrop-blur-md">
+
+            <h2 class="mb-4 text-xl font-bold text-slate-900">
+                Résumé de ton activité
+            </h2>
+
+            <p id="summaryMessage" class="leading-7 text-slate-700">
+                Tes statistiques apparaîtront ici dès que tu auras enregistré des tâches.
+            </p>
+
+            <a href="./index.html"
+               class="mt-6 inline-block rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white transition hover:bg-indigo-700">
+                Retour à mes tâches
+            </a>
+
+        </section>
+
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="border-t border-white/20 bg-white/70 px-4 py-5 text-center text-sm text-slate-700 backdrop-blur-md">
+        © 2026 TaskFlow — Organise tes tâches, avance à ton rythme.
+    </footer>
+
+    <!-- JavaScript des statistiques -->
+    <script>
+        const STORAGE_KEY = "taskflow_tasks";
+
+        const periodFilter = document.getElementById("periodFilter");
+
+        const totalTasksElement = document.getElementById("totalTasks");
+        const finishedTasksElement = document.getElementById("finishedTasks");
+        const pendingTasksElement = document.getElementById("pendingTasks");
+        const completionRateElement = document.getElementById("completionRate");
+
+        const progressLabel = document.getElementById("progressLabel");
+        const progressBar = document.getElementById("progressBar");
+        const progressMessage = document.getElementById("progressMessage");
+
+        const highPriorityElement = document.getElementById("highPriority");
+        const mediumPriorityElement = document.getElementById("mediumPriority");
+        const lowPriorityElement = document.getElementById("lowPriority");
+
+        const highBar = document.getElementById("highBar");
+        const mediumBar = document.getElementById("mediumBar");
+        const lowBar = document.getElementById("lowBar");
+
+        const summaryMessage = document.getElementById("summaryMessage");
+
+        function getTasks() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                const parsed = saved ? JSON.parse(saved) : [];
+
+                if (!Array.isArray(parsed)) {
+                    return [];
+                }
+
+                return parsed.filter(task =>
+                    task &&
+                    typeof task.name === "string" &&
+                    ["Basse", "Moyenne", "Haute"].includes(task.priority)
+                ).map(task => ({
+                    name: task.name,
+                    priority: task.priority,
+                    dueDate: task.dueDate || "",
+                    finished: Boolean(task.finished)
+                }));
+            } catch (error) {
+                console.error("Erreur de lecture des tâches :", error);
+                return [];
+            }
+        }
+
+        function getWeekStart(date) {
+            const result = new Date(date);
+            result.setHours(0, 0, 0, 0);
+
+            const day = result.getDay();
+            const daysSinceMonday = (day + 6) % 7;
+
+            result.setDate(result.getDate() - daysSinceMonday);
+            return result;
+        }
+
+        function filterTasksByPeriod(tasks) {
+            const period = periodFilter.value;
+
+            if (period === "all") {
+                return tasks;
+            }
+
+            const now = new Date();
+            const start = new Date(now);
+            start.setHours(0, 0, 0, 0);
+
+            let end = new Date(start);
+
+            if (period === "week") {
+                const monday = getWeekStart(now);
+                const nextMonday = new Date(monday);
+                nextMonday.setDate(monday.getDate() + 7);
+
+                return tasks.filter(task => {
+                    if (!task.dueDate) return false;
+
+                    const date = new Date(task.dueDate + "T00:00:00");
+                    return date >= monday && date < nextMonday;
+                });
+            }
+
+            if (period === "month") {
+                start.setDate(1);
+                end = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+            }
+
+            if (period === "year") {
+                start.setMonth(0, 1);
+                end = new Date(start.getFullYear() + 1, 0, 1);
+            }
+
+            return tasks.filter(task => {
+                if (!task.dueDate) return false;
+
+                const date = new Date(task.dueDate + "T00:00:00");
+                return date >= start && date < end;
+            });
+        }
+
+        function updateBar(bar, count, total) {
+            const percentage = total > 0 ? (count / total) * 100 : 0;
+            bar.style.width = percentage + "%";
+        }
+
+        function updateStatistics() {
+            const allTasks = getTasks();
+            const tasks = filterTasksByPeriod(allTasks);
+
+            const total = tasks.length;
+            const finished = tasks.filter(task => task.finished).length;
+            const pending = total - finished;
+
+            const high = tasks.filter(task => task.priority === "Haute").length;
+            const medium = tasks.filter(task => task.priority === "Moyenne").length;
+            const low = tasks.filter(task => task.priority === "Basse").length;
+
+            const completionRate = total > 0
+                ? Math.round((finished / total) * 100)
+                : 0;
+
+            totalTasksElement.textContent = total;
+            finishedTasksElement.textContent = finished;
+            pendingTasksElement.textContent = pending;
+            completionRateElement.textContent = completionRate + " %";
+
+            progressLabel.textContent = finished + " sur " + total;
+            progressBar.style.width = completionRate + "%";
+
+            if (total === 0) {
+                progressMessage.textContent =
+                    "Aucune tâche pour cette période. Ajoute des tâches avec des dates d'échéance pour commencer.";
+            } else {
+                progressMessage.textContent =
+                    "Tu as terminé " + finished + " tâche(s) sur " + total +
+                    ", soit " + completionRate + " % de progression.";
+            }
+
+            highPriorityElement.textContent = high;
+            mediumPriorityElement.textContent = medium;
+            lowPriorityElement.textContent = low;
+
+            updateBar(highBar, high, total);
+            updateBar(mediumBar, medium, total);
+            updateBar(lowBar, low, total);
+
+            if (total === 0) {
+                summaryMessage.textContent =
+                    "Aucune tâche ne correspond à cette période. Essaie une autre période ou ajoute des tâches avec une date d'échéance.";
+            } else {
+                summaryMessage.textContent =
+                    "Tu as " + total + " tâche(s) dans cette période : " +
+                    finished + " terminée(s) et " + pending + " en cours. " +
+                    "Les tâches de priorité haute sont au nombre de " + high +
+                    ", celles de priorité moyenne de " + medium +
+                    " et celles de priorité basse de " + low + ".";
+            }
+        }
+
+        periodFilter.addEventListener("change", updateStatistics);
+
+        updateStatistics();
+
+        window.addEventListener("pageshow", updateStatistics);
+
+        window.addEventListener("storage", function (event) {
+            if (event.key === STORAGE_KEY) {
+                updateStatistics();
+            }
+        });
+    </script>
+
+</body>
+</html>
+```

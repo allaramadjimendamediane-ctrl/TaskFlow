@@ -1,0 +1,569 @@
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TaskFlow - Gestion des tâches</title>
+
+    <link href="./output.css" rel="stylesheet">
+
+    <style>
+        /* L'image occupe tout l'écran */
+        .background-image {
+            position: fixed;
+            inset: -5%;
+            z-index: -2;
+            background-image: url("./image.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            animation: flotter 15s ease-in-out infinite alternate;
+            will-change: transform;
+        }
+
+        /* Voile léger pour rendre le texte lisible */
+        .background-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: rgba(15, 23, 42, 0.30);
+            pointer-events: none;
+        }
+
+        /* Mouvement doux et continu */
+        @keyframes flotter {
+            0% {
+                transform: translate3d(-1%, -1%, 0) scale(1);
+            }
+
+            50% {
+                transform: translate3d(1%, 0.5%, 0) scale(1.04);
+            }
+
+            100% {
+                transform: translate3d(-0.5%, 1%, 0) scale(1.07);
+            }
+        }
+
+        /* Respecte les préférences de réduction des animations */
+        @media (prefers-reduced-motion: reduce) {
+            .background-image {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-slate-800">
+
+    <!-- Image flottante couvrant tout l'écran -->
+    <div class="background-image" aria-hidden="true"></div>
+    <div class="background-overlay" aria-hidden="true"></div>
+
+    <!-- En-tête -->
+    <header class="border-b border-white/20 bg-white/75 shadow-sm backdrop-blur-md">
+        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-5">
+
+            <a href="./index.html"
+               class="text-3xl font-extrabold tracking-tight text-indigo-700">
+                TaskFlow
+            </a>
+
+            <nav class="flex flex-wrap gap-4 text-sm font-semibold">
+                <a href="./index.html"
+                   class="text-indigo-700 hover:text-indigo-900">
+                    Mes tâches
+                </a>
+
+                <a href="./dashboard.html"
+                   class="text-slate-700 hover:text-indigo-700">
+                    Tableau de bord
+                </a>
+
+                <a href="./calendrier.html"
+                   class="text-slate-700 hover:text-indigo-700">
+                    Calendrier
+                </a>
+
+                <a href="./statistiques.html"
+                   class="text-slate-700 hover:text-indigo-700">
+                    Statistiques
+                </a>
+
+                <a href="./parametres.html"
+                   class="text-slate-700 hover:text-indigo-700">
+                    Paramètres
+                </a>
+            </nav>
+
+        </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <main class="mx-auto min-h-[calc(100vh-140px)] max-w-5xl px-4 py-10 sm:px-6">
+
+        <!-- Présentation et compteurs -->
+        <section class="mb-8 rounded-3xl border border-white/40 bg-white/75 p-6 shadow-xl backdrop-blur-md sm:p-8">
+
+            <div class="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+
+                <div>
+                    <p class="mb-2 text-sm font-bold uppercase tracking-widest text-indigo-700">
+                        Organise ta journée
+                    </p>
+
+                    <h1 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">
+                        Mes tâches
+                    </h1>
+
+                    <p class="mt-3 text-slate-700">
+                        Organise tes tâches simplement.
+                    </p>
+
+                    <h2 class="mt-2 text-lg font-semibold text-slate-800">
+                        Une tâche accomplie vaut mille projets en tête.
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+
+                    <div class="rounded-2xl border border-indigo-100 bg-indigo-50/90 p-5 text-center">
+                        <p class="text-sm font-medium text-indigo-700">
+                            Total des tâches
+                        </p>
+
+                        <p id="totalTasks"
+                           class="mt-2 text-3xl font-extrabold text-indigo-900">
+                            0
+                        </p>
+                    </div>
+
+                    <div class="rounded-2xl border border-amber-100 bg-amber-50/90 p-5 text-center">
+                        <p class="text-sm font-medium text-amber-700">
+                            À terminer
+                        </p>
+
+                        <p id="pendingTasks"
+                           class="mt-2 text-3xl font-extrabold text-amber-900">
+                            0
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Formulaire d'ajout -->
+        <section class="mb-8 rounded-3xl border border-white/40 bg-white/80 p-6 shadow-xl backdrop-blur-md">
+
+            <h2 class="mb-5 text-xl font-bold text-slate-900">
+                Ajouter une tâche
+            </h2>
+
+            <form id="taskForm" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                <div class="sm:col-span-2">
+                    <label for="taskName"
+                           class="mb-2 block text-sm font-semibold text-slate-700">
+                        Nom de la tâche
+                    </label>
+
+                    <input
+                        type="text"
+                        id="taskName"
+                        placeholder="Ex. : Apprendre JavaScript"
+                        required
+                        class="w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    >
+                </div>
+
+                <div>
+                    <label for="taskPriority"
+                           class="mb-2 block text-sm font-semibold text-slate-700">
+                        Priorité
+                    </label>
+
+                    <select
+                        id="taskPriority"
+                        class="w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    >
+                        <option value="Basse">Basse</option>
+                        <option value="Moyenne" selected>Moyenne</option>
+                        <option value="Haute">Haute</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="taskDueDate"
+                           class="mb-2 block text-sm font-semibold text-slate-700">
+                        Date d'échéance
+                    </label>
+
+                    <input
+                        type="date"
+                        id="taskDueDate"
+                        class="w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    >
+                </div>
+
+                <div class="sm:col-span-2">
+                    <button
+                        type="submit"
+                        class="w-full rounded-xl bg-indigo-600 px-5 py-3 font-bold text-white shadow-md transition hover:bg-indigo-700 active:scale-[0.99]"
+                    >
+                        + Ajouter la tâche
+                    </button>
+                </div>
+
+            </form>
+        </section>
+
+        <!-- Recherche et tri -->
+        <section class="mb-6 rounded-3xl border border-white/40 bg-white/80 p-5 shadow-lg backdrop-blur-md">
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+                <div>
+                    <label for="searchTask"
+                           class="mb-2 block text-sm font-semibold text-slate-700">
+                        Rechercher une tâche
+                    </label>
+
+                    <input
+                        type="search"
+                        id="searchTask"
+                        placeholder="Rechercher une tâche..."
+                        class="w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    >
+                </div>
+
+                <div>
+                    <label for="sortPriority"
+                           class="mb-2 block text-sm font-semibold text-slate-700">
+                        Trier par priorité
+                    </label>
+
+                    <select
+                        id="sortPriority"
+                        class="w-full rounded-xl border border-slate-300 bg-white/90 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    >
+                        <option value="default">Ordre par défaut</option>
+                        <option value="high">Priorité haute d'abord</option>
+                        <option value="low">Priorité basse d'abord</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- Filtres -->
+            <div class="mt-5 flex flex-wrap gap-3" aria-label="Filtres des tâches">
+
+                <button
+                    type="button"
+                    data-filter="all"
+                    aria-pressed="true"
+                    class="filter-button rounded-full bg-indigo-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                >
+                    Toutes
+                </button>
+
+                <button
+                    type="button"
+                    data-filter="pending"
+                    aria-pressed="false"
+                    class="filter-button rounded-full bg-white/90 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-indigo-100"
+                >
+                    En cours
+                </button>
+
+                <button
+                    type="button"
+                    data-filter="finished"
+                    aria-pressed="false"
+                    class="filter-button rounded-full bg-white/90 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-indigo-100"
+                >
+                    Terminées
+                </button>
+
+            </div>
+        </section>
+
+        <!-- Liste des tâches -->
+        <section class="rounded-3xl border border-white/40 bg-white/80 p-6 shadow-xl backdrop-blur-md">
+
+            <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+                <h2 class="text-xl font-bold text-slate-900">
+                    Ma liste de tâches
+                </h2>
+
+                <span id="visibleTasks"
+                      class="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-600">
+                    0 tâche affichée
+                </span>
+            </div>
+
+            <div id="taskList" class="space-y-4"></div>
+
+            <p id="emptyMessage"
+               class="hidden rounded-xl border border-dashed border-slate-300 bg-white/60 p-8 text-center text-slate-600">
+                Aucune tâche à afficher. Ajoute ta première tâche !
+            </p>
+
+        </section>
+
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="border-t border-white/20 bg-white/70 px-4 py-5 text-center text-sm text-slate-700 backdrop-blur-md">
+        <p>
+            © 2026 TaskFlow — Organise tes tâches, avance à ton rythme.
+        </p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        const taskForm = document.getElementById("taskForm");
+        const taskName = document.getElementById("taskName");
+        const taskPriority = document.getElementById("taskPriority");
+        const taskDueDate = document.getElementById("taskDueDate");
+
+        const taskList = document.getElementById("taskList");
+        const totalTasksElement = document.getElementById("totalTasks");
+        const pendingTasksElement = document.getElementById("pendingTasks");
+
+        const searchTask = document.getElementById("searchTask");
+        const sortPriority = document.getElementById("sortPriority");
+        const emptyMessage = document.getElementById("emptyMessage");
+        const visibleTasks = document.getElementById("visibleTasks");
+
+        const STORAGE_KEY = "taskflow_tasks";
+
+        let tasks = [];
+        let currentFilter = "all";
+
+        function saveTasks() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+        }
+
+        function loadTasks() {
+            try {
+                const savedTasks = localStorage.getItem(STORAGE_KEY);
+                const parsedTasks = savedTasks ? JSON.parse(savedTasks) : [];
+
+                tasks = Array.isArray(parsedTasks)
+                    ? parsedTasks.filter(task =>
+                        task &&
+                        typeof task.name === "string" &&
+                        ["Basse", "Moyenne", "Haute"].includes(task.priority)
+                    ).map(task => ({
+                        name: task.name,
+                        priority: task.priority,
+                        dueDate: task.dueDate || "",
+                        finished: Boolean(task.finished)
+                    }))
+                    : [];
+            } catch (error) {
+                tasks = [];
+                console.error("Impossible de charger les tâches :", error);
+            }
+
+            renderTasks();
+        }
+
+        function updateCounters() {
+            totalTasksElement.textContent = tasks.length;
+
+            const pendingCount = tasks.filter(task => !task.finished).length;
+            pendingTasksElement.textContent = pendingCount;
+        }
+
+        function createTaskCard(task, index) {
+            const article = document.createElement("article");
+
+            article.className =
+                "flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between";
+
+            const content = document.createElement("div");
+            content.className = "min-w-0 flex-1";
+
+            const title = document.createElement("h3");
+            title.className = "break-words text-lg font-bold";
+
+            if (task.finished) {
+                title.classList.add("text-slate-400", "line-through");
+            } else {
+                title.classList.add("text-slate-900");
+            }
+
+            title.textContent = task.name;
+
+            const details = document.createElement("div");
+            details.className = "mt-3 flex flex-wrap items-center gap-2 text-sm";
+
+            const priorityBadge = document.createElement("span");
+            priorityBadge.className = "rounded-full px-3 py-1 font-semibold";
+
+            if (task.priority === "Haute") {
+                priorityBadge.classList.add("bg-red-100", "text-red-700");
+            } else if (task.priority === "Moyenne") {
+                priorityBadge.classList.add("bg-amber-100", "text-amber-700");
+            } else {
+                priorityBadge.classList.add("bg-green-100", "text-green-700");
+            }
+
+            priorityBadge.textContent = "Priorité " + task.priority;
+
+            const dueDate = document.createElement("span");
+            dueDate.className = "rounded-full bg-slate-100 px-3 py-1 text-slate-600";
+
+            if (task.dueDate) {
+                const dateParts = task.dueDate.split("-");
+                dueDate.textContent = "Échéance : " +
+                    (dateParts.length === 3
+                        ? dateParts[2] + "/" + dateParts[1] + "/" + dateParts[0]
+                        : task.dueDate);
+            } else {
+                dueDate.textContent = "Aucune échéance";
+            }
+
+            details.append(priorityBadge, dueDate);
+            content.append(title, details);
+
+            const actions = document.createElement("div");
+            actions.className = "flex flex-wrap gap-2";
+
+            const finishButton = document.createElement("button");
+            finishButton.type = "button";
+            finishButton.className =
+                "rounded-lg px-4 py-2 text-sm font-semibold text-white transition " +
+                (task.finished
+                    ? "bg-amber-500 hover:bg-amber-600"
+                    : "bg-green-600 hover:bg-green-700");
+
+            finishButton.textContent = task.finished ? "Rouvrir" : "Terminer";
+
+            finishButton.addEventListener("click", function () {
+                tasks[index].finished = !tasks[index].finished;
+                saveTasks();
+                renderTasks();
+            });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className =
+                "rounded-lg bg-red-100 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-200";
+            deleteButton.textContent = "Supprimer";
+
+            deleteButton.addEventListener("click", function () {
+                tasks.splice(index, 1);
+                saveTasks();
+                renderTasks();
+            });
+
+            actions.append(finishButton, deleteButton);
+            article.append(content, actions);
+
+            return article;
+        }
+
+        function renderTasks() {
+            taskList.replaceChildren();
+
+            const searchText = searchTask.value.trim().toLowerCase();
+
+            let filteredTasks = tasks
+                .map((task, index) => ({ task, index }))
+                .filter(item => {
+                    const matchesSearch = item.task.name
+                        .toLowerCase()
+                        .includes(searchText);
+
+                    const matchesFilter =
+                        currentFilter === "all" ||
+                        (currentFilter === "pending" && !item.task.finished) ||
+                        (currentFilter === "finished" && item.task.finished);
+
+                    return matchesSearch && matchesFilter;
+                });
+
+            if (sortPriority.value === "high") {
+                const priorityOrder = { "Haute": 3, "Moyenne": 2, "Basse": 1 };
+
+                filteredTasks.sort((a, b) =>
+                    priorityOrder[b.task.priority] - priorityOrder[a.task.priority]
+                );
+            } else if (sortPriority.value === "low") {
+                const priorityOrder = { "Haute": 3, "Moyenne": 2, "Basse": 1 };
+
+                filteredTasks.sort((a, b) =>
+                    priorityOrder[a.task.priority] - priorityOrder[b.task.priority]
+                );
+            }
+
+            filteredTasks.forEach(item => {
+                taskList.appendChild(createTaskCard(item.task, item.index));
+            });
+
+            emptyMessage.classList.toggle("hidden", filteredTasks.length !== 0);
+
+            visibleTasks.textContent = filteredTasks.length +
+                (filteredTasks.length > 1 ? " tâches affichées" : " tâche affichée");
+
+            updateCounters();
+
+            document.querySelectorAll(".filter-button").forEach(button => {
+                const active = button.dataset.filter === currentFilter;
+
+                button.setAttribute("aria-pressed", String(active));
+
+                button.classList.toggle("bg-indigo-600", active);
+                button.classList.toggle("text-white", active);
+                button.classList.toggle("bg-white/90", !active);
+                button.classList.toggle("text-slate-700", !active);
+            });
+        }
+
+        taskForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const name = taskName.value.trim();
+
+            if (!name) {
+                taskName.focus();
+                return;
+            }
+
+            tasks.push({
+                name: name,
+                priority: taskPriority.value,
+                dueDate: taskDueDate.value,
+                finished: false
+            });
+
+            saveTasks();
+            renderTasks();
+
+            taskForm.reset();
+            taskPriority.value = "Moyenne";
+            taskName.focus();
+        });
+
+        searchTask.addEventListener("input", renderTasks);
+        sortPriority.addEventListener("change", renderTasks);
+
+        document.querySelectorAll(".filter-button").forEach(button => {
+            button.addEventListener("click", function () {
+                currentFilter = button.dataset.filter;
+                renderTasks();
+            });
+        });
+
+        loadTasks();
+    </script>
+
+</body>
+</html>
+```

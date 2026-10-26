@@ -1,0 +1,209 @@
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Paramètres</title>
+    <link href="./output.css" rel="stylesheet">
+</head>
+
+<body class="min-h-screen bg-slate-50 text-black transition-colors duration-300">
+
+    <div class="flex min-h-screen">
+
+        <!-- Menu latéral -->
+        <aside class="w-64 shrink-0 rounded-r-2xl bg-blue-950 p-6 text-white shadow-xl">
+            <h2 class="mb-10 text-2xl font-bold">TaskFlow</h2>
+
+            <nav class="space-y-3">
+                <a href="./dashboard.html"
+                   class="block rounded-xl px-4 py-3 hover:bg-blue-900">
+                    Tableau de bord
+                </a>
+
+                <a href="./index.html"
+                   class="block rounded-xl px-4 py-3 hover:bg-blue-900">
+                    Mes tâches
+                </a>
+
+                <a href="./calendrier.html"
+                   class="block rounded-xl px-4 py-3 hover:bg-blue-900">
+                    Calendrier
+                </a>
+
+                <a href="./statistiques.html"
+                   class="block rounded-xl px-4 py-3 hover:bg-blue-900">
+                    Statistiques
+                </a>
+
+                <a href="./parametres.html"
+                   class="block rounded-xl bg-blue-800 px-4 py-3 font-semibold">
+                    Paramètres
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Contenu principal -->
+        <main id="mainContent" class="min-w-0 flex-1 p-6 md:p-10">
+
+            <header class="mb-8">
+                <h1 class="text-3xl font-bold text-red-500">
+                    Paramètres
+                </h1>
+
+                <p class="mt-2 text-slate-600">
+                    Personnalise ton espace de travail TaskFlow.
+                </p>
+            </header>
+
+            <!-- Apparence -->
+            <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-md">
+                <h2 class="mb-2 text-xl font-bold">Apparence</h2>
+
+                <p class="mb-5 text-slate-600">
+                    Choisis le thème qui te convient.
+                </p>
+
+                <label for="themeSelect" class="mb-2 block font-medium">
+                    Thème de l'application
+                </label>
+
+                <select id="themeSelect"
+                        class="w-full max-w-sm rounded-xl border border-slate-300 bg-white p-3">
+                    <option value="light">Clair</option>
+                    <option value="dark">Sombre</option>
+                </select>
+            </section>
+
+            <!-- Taille du texte -->
+            <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-md">
+                <h2 class="mb-2 text-xl font-bold">Affichage</h2>
+
+                <p class="mb-5 text-slate-600">
+                    Ajuste la taille du texte sur cette page.
+                </p>
+
+                <label for="fontSizeSelect" class="mb-2 block font-medium">
+                    Taille du texte
+                </label>
+
+                <select id="fontSizeSelect"
+                        class="w-full max-w-sm rounded-xl border border-slate-300 bg-white p-3">
+                    <option value="16">Normale</option>
+                    <option value="18">Grande</option>
+                    <option value="20">Très grande</option>
+                </select>
+            </section>
+
+            <!-- Zone dangereuse -->
+            <section class="rounded-2xl border border-red-200 bg-white p-6 shadow-md">
+                <h2 class="mb-2 text-xl font-bold text-red-600">
+                    Zone dangereuse
+                </h2>
+
+                <p class="mb-5 text-slate-600">
+                    Cette action supprime définitivement les tâches enregistrées
+                    dans le stockage local de TaskFlow.
+                </p>
+
+                <button id="deleteAllTasks"
+                        type="button"
+                        class="rounded-xl bg-red-600 px-5 py-3 font-semibold text-white shadow-sm hover:bg-red-700">
+                    Supprimer toutes les tâches
+                </button>
+
+                <p id="message" class="mt-4 text-sm" role="status"></p>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const themeSelect = document.getElementById("themeSelect");
+        const fontSizeSelect = document.getElementById("fontSizeSelect");
+        const mainContent = document.getElementById("mainContent");
+        const deleteButton = document.getElementById("deleteAllTasks");
+        const message = document.getElementById("message");
+
+        const TASKS_KEY = "taskflow_tasks";
+        const THEME_KEY = "taskflow_theme";
+        const FONT_KEY = "taskflow_font_size";
+
+        // Appliquer le thème choisi
+        function applyTheme(theme) {
+            const isDark = theme === "dark";
+
+            document.body.classList.toggle("bg-slate-900", isDark);
+            document.body.classList.toggle("text-white", isDark);
+            document.body.classList.toggle("bg-slate-50", !isDark);
+            document.body.classList.toggle("text-black", !isDark);
+
+            document.querySelectorAll("main section").forEach(section => {
+                section.classList.toggle("bg-slate-800", isDark);
+                section.classList.toggle("border-slate-700", isDark);
+                section.classList.toggle("bg-white", !isDark);
+                section.classList.toggle("border-slate-200", !isDark);
+            });
+
+            document.querySelectorAll("main p").forEach(paragraph => {
+                paragraph.classList.toggle("text-slate-300", isDark);
+                paragraph.classList.toggle("text-slate-600", !isDark);
+            });
+
+            themeSelect.value = theme;
+        }
+
+        // Charger et enregistrer le thème
+        const savedTheme = localStorage.getItem(THEME_KEY) || "light";
+        applyTheme(savedTheme);
+
+        themeSelect.addEventListener("change", function () {
+            localStorage.setItem(THEME_KEY, themeSelect.value);
+            applyTheme(themeSelect.value);
+        });
+
+        // Appliquer la taille du texte
+        function applyFontSize(size) {
+            mainContent.style.fontSize = size + "px";
+            fontSizeSelect.value = size;
+        }
+
+        const savedFontSize = localStorage.getItem(FONT_KEY) || "16";
+        applyFontSize(savedFontSize);
+
+        fontSizeSelect.addEventListener("change", function () {
+            localStorage.setItem(FONT_KEY, fontSizeSelect.value);
+            applyFontSize(fontSizeSelect.value);
+        });
+
+        // Supprimer toutes les tâches après confirmation
+        deleteButton.addEventListener("click", function () {
+            const savedTasks = localStorage.getItem(TASKS_KEY);
+            const tasks = savedTasks ? JSON.parse(savedTasks) : [];
+
+            if (tasks.length === 0) {
+                message.textContent = "Aucune tâche à supprimer.";
+                message.className = "mt-4 text-sm text-amber-600";
+                return;
+            }
+
+            const confirmation = confirm(
+                "Attention ! Veux-tu vraiment supprimer toutes les tâches ? Cette action est irréversible."
+            );
+
+            if (confirmation) {
+                localStorage.removeItem(TASKS_KEY);
+
+                message.textContent = "Toutes les tâches ont été supprimées.";
+                message.className = "mt-4 text-sm text-green-600";
+            } else {
+                message.textContent = "Suppression annulée.";
+                message.className = "mt-4 text-sm text-slate-500";
+            }
+        });
+    </script>
+
+</body>
+</html>
+```

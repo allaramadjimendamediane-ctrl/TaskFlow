@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TaskFlow - Calendrier</title>
+
+    <link href="./output.css" rel="stylesheet">
+</head>
+
+<body class="min-h-screen bg-slate-50 text-black">
+
+    <div class="flex min-h-screen">
+
+        <!-- Barre latérale -->
+        <aside class="w-64 rounded-r-2xl bg-blue-950 p-6 text-white shadow-lg">
+
+            <h1 class="mb-8 text-2xl font-bold text-white">
+                TaskFlow
+            </h1>
+
+            <nav class="space-y-3">
+
+                <a href="./dashboard.html"
+                   class="block rounded-xl p-3 text-white transition hover:bg-blue-800">
+                    Tableau de bord
+                </a>
+
+                <a href="./index.html"
+                   class="block rounded-xl p-3 text-white transition hover:bg-blue-800">
+                    Mes tâches
+                </a>
+
+                <a href="./calendrier.html"
+                   class="block rounded-xl bg-blue-600 p-3 font-semibold text-white shadow-md">
+                    Calendrier
+                </a>
+
+                <a href="./statistiques.html"
+                   class="block rounded-xl p-3 text-white transition hover:bg-blue-800">
+                    Statistiques
+                </a>
+
+                <a href="./parametres.html"
+                   class="block rounded-xl p-3 text-white transition hover:bg-blue-800">
+                    Paramètres
+                </a>
+
+            </nav>
+        </aside>
+
+        <!-- Contenu principal -->
+        <main class="min-w-0 flex-1 p-6 md:p-10">
+
+            <h2 class="mb-3 text-3xl font-bold text-red-500 md:text-4xl">
+                Calendrier
+            </h2>
+
+            <p class="mb-8 text-black">
+                Consulte tes tâches selon leurs dates d'échéance.
+            </p>
+
+            <!-- Liste des tâches -->
+            <section class="rounded-2xl bg-white p-6 shadow-md ring-1 ring-slate-200">
+
+                <h3 class="mb-5 text-xl font-bold text-blue-950">
+                    Mes échéances
+                </h3>
+
+                <div id="calendarTasks" class="space-y-4">
+                    <!-- Les tâches seront affichées ici par JavaScript -->
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+        const calendarTasks = document.getElementById("calendarTasks");
+        const STORAGE_KEY = "taskflow_tasks";
+
+        function displayCalendarTasks() {
+            const savedTasks = localStorage.getItem(STORAGE_KEY);
+            const tasks = savedTasks ? JSON.parse(savedTasks) : [];
+
+            calendarTasks.replaceChildren();
+
+            const tasksWithDates = tasks
+                .map((task, index) => ({ ...task, originalIndex: index }))
+                .filter(task => task.dueDate)
+                .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+
+            if (tasksWithDates.length === 0) {
+                const message = document.createElement("p");
+                message.className = "rounded-xl bg-slate-50 p-4 text-black";
+                message.textContent =
+                    "Aucune tâche avec une date d'échéance. Ajoute une date dans Mes tâches.";
+                calendarTasks.appendChild(message);
+                return;
+            }
+
+            tasksWithDates.forEach(task => {
+                const card = document.createElement("article");
+                card.className =
+                    "rounded-xl border border-slate-200 p-4 shadow-sm transition hover:shadow-md";
+
+                const date = document.createElement("p");
+                date.className = "mb-2 text-sm font-semibold text-red-500";
+
+                const parsedDate = new Date(task.dueDate + "T00:00:00");
+                date.textContent = Number.isNaN(parsedDate.getTime())
+                    ? "Date invalide : " + task.dueDate
+                    : "Échéance : " + parsedDate.toLocaleDateString("fr-FR");
+
+                const name = document.createElement("h4");
+                name.className = "font-bold text-blue-950";
+                name.textContent = task.name;
+
+                const priority = document.createElement("p");
+                priority.className = "mt-1 text-sm text-black";
+                priority.textContent = "Priorité : " + task.priority;
+
+                const status = document.createElement("p");
+                status.className = "mt-2 text-sm font-semibold";
+
+                if (task.finished) {
+                    status.textContent = "Terminée";
+                    status.classList.add("text-green-600");
+                } else {
+                    status.textContent = "En cours";
+                    status.classList.add("text-blue-700");
+                }
+
+                card.append(date, name, priority, status);
+                calendarTasks.appendChild(card);
+            });
+        }
+
+        try {
+            displayCalendarTasks();
+        } catch (error) {
+            calendarTasks.textContent =
+                "Impossible de charger les tâches. Vérifie les données enregistrées dans le navigateur.";
+            console.error("Erreur de chargement du calendrier :", error);
+        }
+    </script>
+
+</body>
+</html>
